@@ -2,12 +2,12 @@ import random
 
 N_ITENS = 10
 PESO_LIMIT = 10
-TEMP_INI = 1000
+TEMP_INI = 100
 TEMP_DEC = 1
 
-VALOR_MAX = 30
+VALOR_MAX = 10
 VALOR_MIN = 1
-PESO_MAX = 30
+PESO_MAX = 10
 PESO_MIN = 1
 
 SEMENTE = 10
@@ -41,6 +41,13 @@ def inicializa_itens_ale():
 		it.peso = random.randint(PESO_MIN, PESO_MAX - 1)
 
 	return lista_itens
+
+def inicializa_estado_aleatorio(e):
+	random.seed(SEMENTE)
+
+	for i in range(N_ITENS):
+		e.itens[i] = random.randint(0, 1)
+	atualiza_soma_estado(e)
 
 def define_Estado(e, peso_som, valor_som, itens):
 	if e is None:
@@ -122,15 +129,62 @@ def f_objetivo(e):
 
 	#return e.peso_som * (e.peso_som // e.valor_som)
 
-def temp_decai(temperatura):
-	temperatura[0] -= TEMP_DEC
-
 def valida_estado(e):
 	if e is None:
 		print("Estado parametro mal alocado")
 		return None
 
-	if e.peso_som > PESO_LIMIT:
+	if e.peso_som >= PESO_LIMIT:
 		return 0
 
 	return 1
+
+def atualiza_soma_estado(e):
+	global lista_itens
+	
+	som_peso = 0
+	som_valor =0
+	for i in range(N_ITENS):
+		if e.itens[i] == 1:
+			som_peso += lista_itens[i].peso
+			som_valor += lista_itens[i].valor
+	e.valor_som = som_valor
+	e.peso_som = som_peso
+
+def prob_troca(e_at, viz, temp):
+	if (f_objetivo(e_at) < f_objetivo(viz)):
+		return 1.0
+	return (temp /TEMP_INI )
+
+def main():
+	inicializa_itens_ale()
+	e_atual = Estado()
+	inicializa_estado_aleatorio(e_atual)
+
+	global lista_itens
+
+	for item in lista_itens:
+		print(item.valor, item.peso)
+	
+	melhor = Estado()
+
+	temperatura = TEMP_INI
+	while (temperatura > 0):
+		viz = vizinho(e_atual)
+		if (random.random() <= prob_troca(e_atual, viz, temperatura)):
+			e_atual.itens = viz.itens.copy()
+			e_atual.peso_som = viz.peso_som
+			e_atual.valor_som = viz.valor_som
+		temperatura -= TEMP_DEC
+
+		if (valida_estado(e_atual)):
+			if (f_objetivo(e_atual) > f_objetivo(melhor)):
+				melhor.itens = e_atual.itens.copy()
+				melhor.peso_som = e_atual.peso_som
+				melhor.valor_som = e_atual.valor_som
+	
+	print(f"Melhor solução encontrada {melhor.valor_som} / {melhor.peso_som} \n")
+	print(f"obtida levando {melhor.itens}")
+
+if __name__ == "__main__":
+    main()

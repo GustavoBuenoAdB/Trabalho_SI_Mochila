@@ -1,20 +1,18 @@
 import random
 
-N_ITENS = 10
+N_ITENS = 5
 PESO_LIMIT = 10
-TEMP_INI = 1000
-TEMP_DEC = 1
 
-TAM_POPULACAO = 30
+TAM_POPULACAO = 4
 N_GERACOES = 10
 CHANCE_MUTACAO = 0.05
 
-VALOR_MAX = 30
+VALOR_MAX = 10
 VALOR_MIN = 1
-PESO_MAX = 30
+PESO_MAX = 10
 PESO_MIN = 1
 
-SEMENTE = 10
+SEMENTE = 100
 
 class Item:
 	def __init__(self):
@@ -132,26 +130,41 @@ def valida_estado(e):
 	return 1
 
 def f_fitness(e):
-	return f_objetivo(e) #tem que retornar entre 0 e 1?
 
-def sortear_par(): #tem que ver isso aqui pq depende de como torno a f_fitness em um valor entre 0 e 1, ou o acumulo em 0 e 1 pra poder sortear.
+	if (valida_estado(e)):
+		return f_objetivo(e) #tem que retornar entre 0 e 1?
+	return 0
+
+def sortear_estado():
 	global populacao
-	# acumular todos os fits vai dar um "som" ai um estado tem fit "x" e "x/som" é 
-	# sempre um valor entre 0 e 1 ja que "som < x" essa é a odd de ele ser sorteado,
-	# mas isso pode rodar O(infinito) pra grandes opulações
 
-def cruza_estados(e1, e2):
-	ef = Estado()
+	som_chances = 0
+	for e in populacao:
+		som_chances += f_fitness(e)
+	
+	sorteado = (random.random() * som_chances)
+
+	for e in populacao:
+		sorteado -= f_fitness(e)
+		if (sorteado <= 0):
+			return e
+
+def cruza_estados(e1, e2, ef):
+
+	if ((f_fitness(e1) + f_fitness(e2)) == 0):
+		prob = 0.5
+	else:
+		prob = f_fitness(e1) / (f_fitness(e1) + f_fitness(e2)) #entre 0 e 1
+
 	for i in range(N_ITENS):
 		if (e1.itens[i] != e2.itens[i]):
-			if (random.random < 0.5):
+			if (random.random() < prob):
 				ef.itens[i] = e1.itens[i]
 			else:
 				ef.itens[i] = e2.itens[i]
 		else:
-			e1.itens[i]
+			ef.itens[i] = e1.itens[i]
 	atualiza_soma_estado(ef)
-
 
 def inicializa_populacao_ale():
 	global populacao
@@ -164,7 +177,7 @@ def inicializa_populacao_ale():
 
 	for e in populacao:
 		for i in range(N_ITENS):
-			e.itens[i] = random.randint % 2
+			e.itens[i] = random.randint(0, 1)
 		atualiza_soma_estado(e)
 
 def atualiza_soma_estado(e):
@@ -176,4 +189,37 @@ def atualiza_soma_estado(e):
 		if e.itens[i] == 1:
 			som_peso += lista_itens[i].peso
 			som_valor += lista_itens[i].valor
+	e.valor_som = som_valor
+	e.peso_som = som_peso
 			
+def main():
+	inicializa_itens_ale()
+	inicializa_populacao_ale()
+
+	global lista_itens
+
+	for item in lista_itens:
+		print(item.valor, item.peso)
+	
+	global populacao
+	nova_populacao = [Estado() for _ in range(TAM_POPULACAO)]
+	melhor = Estado()
+
+	for i in range(N_GERACOES):
+		for e in nova_populacao:
+			cruza_estados(sortear_estado(), sortear_estado(), e)
+			mutacao(e)
+			if (valida_estado(e)):
+				if (f_fitness(e) > f_fitness(melhor)):
+					melhor.itens = e.itens.copy()
+					melhor.peso_som = e.peso_som
+					melhor.valor_som = e.valor_som
+		populacao = [e for e in nova_populacao]
+		
+		for e in populacao:
+			print(e.valor_som, e.peso_som, e.itens)
+		print(f"Melhor solução encontrada {melhor.valor_som} / {melhor.peso_som} \n")
+		print(f"obtida levando {melhor.itens}")
+
+if __name__ == "__main__":
+    main()

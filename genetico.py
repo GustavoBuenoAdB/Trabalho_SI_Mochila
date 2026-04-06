@@ -3,7 +3,7 @@ import random
 N_ITENS = 5
 PESO_LIMIT = 10
 
-TAM_POPULACAO = 4
+TAM_POPULACAO = 50
 N_GERACOES = 10
 CHANCE_MUTACAO = 0.05
 
@@ -12,7 +12,7 @@ VALOR_MIN = 1
 PESO_MAX = 10
 PESO_MIN = 1
 
-SEMENTE = 100
+SEMENTE = 399
 
 class Item:
 	def __init__(self):
@@ -109,15 +109,15 @@ def f_objetivo(e):
 		print("Estado parametro mal alocado")
 		return None
 
-	if e.peso_som == 0:
+	#if e.peso_som == 0:
 		return 0
 
-	return e.valor_som * (e.valor_som / e.peso_som)
+	#return e.valor_som * (e.valor_som / e.peso_som)
 
-	#if e.valor_som == 0:
-		#return 0
+	if e.valor_som == 0:
+		return 0
 
-	#return e.peso_som * (e.peso_som // e.valor_som)
+	return e.peso_som * (e.peso_som // e.valor_som)
 
 def valida_estado(e):
 	if e is None:
@@ -204,7 +204,12 @@ def main():
 	global populacao
 	nova_populacao = [Estado() for _ in range(TAM_POPULACAO)]
 	melhor = Estado()
-
+	for e in populacao:
+		print(e.valor_som, e.peso_som, e.itens)
+	
+	print(f"Melhor solução encontrada {melhor.valor_som} / {melhor.peso_som} \n")
+	print(f"obtida levando {melhor.itens}")
+	
 	for i in range(N_GERACOES):
 		for e in nova_populacao:
 			cruza_estados(sortear_estado(), sortear_estado(), e)

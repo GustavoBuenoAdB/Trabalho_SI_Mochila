@@ -1,18 +1,24 @@
 import random
 
 N_ITENS = 10
-PESO_LIMIT = 10
+PESO_LIMIT = 25
 
-TAM_POPULACAO = 10
-N_GERACOES = 10
+TAM_POPULACAO = 30
+N_GERACOES = 100
 CHANCE_MUTACAO = 0.05
 
-VALOR_MAX = 10
+VALOR_MAX = 100
 VALOR_MIN = 1
 PESO_MAX = 10
 PESO_MIN = 1
 
-SEMENTE = 399
+SEMENTE_ITEM = 399
+SEMENTE_POPU = 400
+SEMENTE_EXEC = 279
+
+MOSTRA_POP = True
+MOSTRA_MEL_GER = True 
+PROB_50_50 = True
 
 class Item:
 	def __init__(self):
@@ -36,7 +42,7 @@ def inicializa_itens_ale():
 	if lista_itens is None or len(lista_itens) == 0:
 		lista_itens = [Item() for _ in range(N_ITENS)]
 
-	random.seed(SEMENTE)
+	random.seed(SEMENTE_ITEM)
 
 	for it in lista_itens:
 		it.valor = random.randint(VALOR_MIN, VALOR_MAX - 1)
@@ -151,10 +157,12 @@ def sortear_estado():
 
 def cruza_estados(e1, e2, ef):
 
-	#if ((f_fitness(e1) + f_fitness(e2)) == 0):
-	prob = 0.5
-	#else:
-		#prob = f_fitness(e1) / (f_fitness(e1) + f_fitness(e2)) #entre 0 e 1
+	if (PROB_50_50):
+		prob = 0.5
+	elif ((f_fitness(e1) + f_fitness(e2)) == 0):
+		prob = 0.5
+	else:
+		prob = f_fitness(e1) / (f_fitness(e1) + f_fitness(e2)) #entre 0 e 1
 
 	for i in range(N_ITENS):
 		if (e1.itens[i] != e2.itens[i]):
@@ -163,7 +171,10 @@ def cruza_estados(e1, e2, ef):
 			else:
 				ef.itens[i] = e2.itens[i]
 		else:
-			ef.itens[i] = e1.itens[i]
+			if (random.random() < CHANCE_MUTACAO):
+				ef.itens[i] = random.randint(0,1)
+			else:
+				ef.itens[i] = e1.itens[i]
 	atualiza_soma_estado(ef)
 
 def inicializa_populacao_ale():
@@ -173,7 +184,7 @@ def inicializa_populacao_ale():
 	if populacao is None or len(populacao) == 0:
 		populacao = [Estado() for _ in range(TAM_POPULACAO)]
 
-	random.seed(SEMENTE)
+	random.seed(SEMENTE_POPU)
 
 	e_vaz = Estado()
 	e_che = Estado()
@@ -214,9 +225,12 @@ def main():
 	nova_populacao = [Estado() for _ in range(TAM_POPULACAO)]
 	melhor = Estado()
 
-	for e in populacao:
-		print(e.valor_som, e.peso_som, e.itens, f_fitness(e))
+	if (MOSTRA_POP):
+		for e in populacao:
+			print(e.valor_som, e.peso_som, e.itens, f_fitness(e))
 	
+	random.seed(SEMENTE_EXEC)
+
 	for i in range(N_GERACOES):
 		for e in nova_populacao:
 			e1 = sortear_estado()
@@ -233,9 +247,14 @@ def main():
 					melhor.valor_som = e.valor_som
 		populacao = [e for e in nova_populacao]
 		
-		for e in populacao:
-			print(e.valor_som, e.peso_som, e.itens, f_fitness(e))
-		print(f"\nMelhor solução encontrada {melhor.valor_som} / {melhor.peso_som}, {f_fitness(e)} {melhor.itens} \n")
+		if (MOSTRA_POP):
+			for e in populacao:
+				print(e.valor_som, e.peso_som, e.itens, f_fitness(e))
+		if (MOSTRA_MEL_GER):
+			print(f"Melhor estado na geração {i}: {melhor.valor_som} / {melhor.peso_som}, {f_fitness(melhor)} {melhor.itens}")
+	
+	print(f"\nMelhor solução encontrada {melhor.valor_som} / {melhor.peso_som}, {f_fitness(melhor)} {melhor.itens}")
+
 
 if __name__ == "__main__":
 	main()

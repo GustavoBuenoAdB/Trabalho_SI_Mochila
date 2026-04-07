@@ -1,7 +1,7 @@
 import random
 
-N_ITENS = 10
-PESO_LIMIT = 10
+N_ITENS = 25
+PESO_LIMIT = 25
 TEMP_INI = 100
 TEMP_DEC = 1
 
@@ -104,6 +104,9 @@ def vizinho(e):
 
 	item_ale = random.randint(0, N_ITENS - 1)
 
+	while e.itens[item_ale] == 0 and e.peso_som + lista_itens[item_ale].peso > PESO_LIMIT:
+		item_ale = random.randint(0, N_ITENS - 1)		
+
 	if e.itens[item_ale] == 0:
 		add_Item(viz, item_ale)
 	elif e.itens[item_ale] == 1:
@@ -118,11 +121,14 @@ def f_objetivo(e):
 	if e is None:
 		print("Estado parametro mal alocado")
 		return None
-
-	if e.peso_som == 0:
+	
+	if e.peso_som > PESO_LIMIT:
 		return 0
 
-	return e.valor_som * (e.valor_som / e.peso_som)
+	if e.peso_som == 0 :
+		return 0
+
+	return e.valor_som * (e.valor_som / (PESO_LIMIT + 1 - e.peso_som))
 
 	#if e.valor_som == 0:
 		#return 0
@@ -154,12 +160,12 @@ def atualiza_soma_estado(e):
 def prob_troca(e_at, viz, temp):
 	if (f_objetivo(e_at) < f_objetivo(viz)):
 		return 1.0
-	return (temp /TEMP_INI )
+	return ((f_objetivo(viz)/f_objetivo(e_at)) * (temp /TEMP_INI))
 
 def main():
 	inicializa_itens_ale()
 	e_atual = Estado()
-	inicializa_estado_aleatorio(e_atual)
+	#inicializa_estado_aleatorio(e_atual)
 
 	global lista_itens
 
@@ -171,6 +177,12 @@ def main():
 	temperatura = TEMP_INI
 	while (temperatura > 0):
 		viz = vizinho(e_atual)
+
+		print(f" {e_atual.valor_som} / {e_atual.peso_som} \n")
+		print(f"prob {prob_troca(e_atual, viz, temperatura)} para {viz.valor_som} / {viz.peso_som} ")
+		print(f" {e_atual.itens}")
+		
+
 		if (random.random() <= prob_troca(e_atual, viz, temperatura)):
 			e_atual.itens = viz.itens.copy()
 			e_atual.peso_som = viz.peso_som

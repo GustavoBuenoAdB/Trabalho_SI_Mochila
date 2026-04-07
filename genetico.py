@@ -1,9 +1,9 @@
 import random
 
-N_ITENS = 5
+N_ITENS = 10
 PESO_LIMIT = 10
 
-TAM_POPULACAO = 4
+TAM_POPULACAO = 10
 N_GERACOES = 10
 CHANCE_MUTACAO = 0.05
 
@@ -12,7 +12,7 @@ VALOR_MIN = 1
 PESO_MAX = 10
 PESO_MIN = 1
 
-SEMENTE = 100
+SEMENTE = 399
 
 class Item:
 	def __init__(self):
@@ -109,15 +109,15 @@ def f_objetivo(e):
 		print("Estado parametro mal alocado")
 		return None
 
-	if e.peso_som == 0:
+	#if e.peso_som == 0:
 		return 0
 
-	return e.valor_som * (e.valor_som / e.peso_som)
+	#return e.valor_som * (e.valor_som / e.peso_som)
 
-	#if e.valor_som == 0:
-		#return 0
+	if e.valor_som == 0:
+		return 0
 
-	#return e.peso_som * (e.peso_som // e.valor_som)
+	return e.valor_som * (e.valor_som / (PESO_LIMIT + 1 - e.peso_som))
 
 def valida_estado(e):
 	if e is None:
@@ -133,7 +133,7 @@ def f_fitness(e):
 
 	if (valida_estado(e)):
 		return f_objetivo(e) #tem que retornar entre 0 e 1?
-	return 0
+	return  (PESO_LIMIT / e.peso_som) * (e.valor_som * (e.valor_som / (e.peso_som)))
 
 def sortear_estado():
 	global populacao
@@ -151,10 +151,10 @@ def sortear_estado():
 
 def cruza_estados(e1, e2, ef):
 
-	if ((f_fitness(e1) + f_fitness(e2)) == 0):
-		prob = 0.5
-	else:
-		prob = f_fitness(e1) / (f_fitness(e1) + f_fitness(e2)) #entre 0 e 1
+	#if ((f_fitness(e1) + f_fitness(e2)) == 0):
+	prob = 0.5
+	#else:
+		#prob = f_fitness(e1) / (f_fitness(e1) + f_fitness(e2)) #entre 0 e 1
 
 	for i in range(N_ITENS):
 		if (e1.itens[i] != e2.itens[i]):
@@ -175,7 +175,16 @@ def inicializa_populacao_ale():
 
 	random.seed(SEMENTE)
 
+	e_vaz = Estado()
+	e_che = Estado()
+	for i in range(N_ITENS):
+		e_che.itens[i] = 1
+	atualiza_soma_estado(e_che)
+
 	for e in populacao:
+		
+		cruza_estados(e_vaz, e_che, e)
+
 		for i in range(N_ITENS):
 			e.itens[i] = random.randint(0, 1)
 		atualiza_soma_estado(e)
@@ -205,9 +214,17 @@ def main():
 	nova_populacao = [Estado() for _ in range(TAM_POPULACAO)]
 	melhor = Estado()
 
+	for e in populacao:
+		print(e.valor_som, e.peso_som, e.itens, f_fitness(e))
+	
 	for i in range(N_GERACOES):
 		for e in nova_populacao:
-			cruza_estados(sortear_estado(), sortear_estado(), e)
+			e1 = sortear_estado()
+			populacao.remove(e1)
+			e2 = sortear_estado()
+			populacao.append(e1)
+
+			cruza_estados(e1,e2, e)
 			mutacao(e)
 			if (valida_estado(e)):
 				if (f_fitness(e) > f_fitness(melhor)):
@@ -217,9 +234,8 @@ def main():
 		populacao = [e for e in nova_populacao]
 		
 		for e in populacao:
-			print(e.valor_som, e.peso_som, e.itens)
-		print(f"Melhor solução encontrada {melhor.valor_som} / {melhor.peso_som} \n")
-		print(f"obtida levando {melhor.itens}")
+			print(e.valor_som, e.peso_som, e.itens, f_fitness(e))
+		print(f"\nMelhor solução encontrada {melhor.valor_som} / {melhor.peso_som}, {f_fitness(e)} {melhor.itens} \n")
 
 if __name__ == "__main__":
 	main()

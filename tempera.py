@@ -1,8 +1,11 @@
 import random
+import time
 
-N_ITENS = 25
-PESO_LIMIT = 25
-TEMP_INI = 100
+TESTE_TEMPO = 0
+
+N_ITENS = 2500
+PESO_LIMIT = 2
+TEMP_INI = 10000
 TEMP_DEC = 1
 
 VALOR_MAX = 10
@@ -123,10 +126,9 @@ def f_objetivo(e):
 		return None
 	
 	if e.peso_som > PESO_LIMIT:
-		return 0
-
-	if e.peso_som == 0 :
-		return 0
+		return 1
+	if e.peso_som == 0 or e.valor_som == 0:
+		return 1
 
 	return e.valor_som * (e.valor_som / (PESO_LIMIT + 1 - e.peso_som))
 
@@ -163,14 +165,15 @@ def prob_troca(e_at, viz, temp):
 	return ((f_objetivo(viz)/f_objetivo(e_at)) * (temp /TEMP_INI))
 
 def main():
+	t_inicial = time.time()
 	inicializa_itens_ale()
 	e_atual = Estado()
 	#inicializa_estado_aleatorio(e_atual)
 
 	global lista_itens
 
-	for item in lista_itens:
-		print(item.valor, item.peso)
+	#for item in lista_itens:
+		#print(item.valor, item.peso)
 	
 	melhor = Estado()
 
@@ -178,9 +181,9 @@ def main():
 	while (temperatura > 0):
 		viz = vizinho(e_atual)
 
-		print(f" {e_atual.valor_som} / {e_atual.peso_som} \n")
-		print(f"prob {prob_troca(e_atual, viz, temperatura)} para {viz.valor_som} / {viz.peso_som} ")
-		print(f" {e_atual.itens}")
+		#print(f" {e_atual.valor_som} / {e_atual.peso_som} \n")
+		#print(f"prob {prob_troca(e_atual, viz, temperatura)} para {viz.valor_som} / {viz.peso_som} ")
+		#print(f" {e_atual.itens}")
 		
 
 		if (random.random() <= prob_troca(e_atual, viz, temperatura)):
@@ -194,9 +197,11 @@ def main():
 				melhor.itens = e_atual.itens.copy()
 				melhor.peso_som = e_atual.peso_som
 				melhor.valor_som = e_atual.valor_som
-	
-	print(f"Melhor solução encontrada {melhor.valor_som} / {melhor.peso_som} \n")
-	print(f"obtida levando {melhor.itens}")
+	t_final = time.time()
+	#print(f"Melhor solução encontrada {melhor.valor_som} / {melhor.peso_som} \n")
+	#print(f"obtida levando {melhor.itens}")
+	if(TESTE_TEMPO):
+		print(f"Tempo de execução: {t_final - t_inicial}")
 
 if __name__ == "__main__":
     main()

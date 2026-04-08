@@ -1,9 +1,9 @@
 import random
 
-N_ITENS = 5
+N_ITENS = 10
 PESO_LIMIT = 10
 
-TAM_POPULACAO = 50
+TAM_POPULACAO = 30
 N_GERACOES = 10
 CHANCE_MUTACAO = 0.05
 
@@ -12,7 +12,13 @@ VALOR_MIN = 1
 PESO_MAX = 10
 PESO_MIN = 1
 
-SEMENTE = 399
+SEMENTE_ITEM = 399
+SEMENTE_POPU = 420
+SEMENTE_EXEC = 6975
+
+MOSTRA_POP = 1
+MOSTRA_MEL_GER = True 
+PROB_50_50 = True
 
 class Item:
 	def __init__(self):
@@ -36,7 +42,7 @@ def inicializa_itens_ale():
 	if lista_itens is None or len(lista_itens) == 0:
 		lista_itens = [Item() for _ in range(N_ITENS)]
 
-	random.seed(SEMENTE)
+	random.seed(SEMENTE_ITEM)
 
 	for it in lista_itens:
 		it.valor = random.randint(VALOR_MIN, VALOR_MAX - 1)
@@ -117,7 +123,7 @@ def f_objetivo(e):
 	if e.valor_som == 0:
 		return 0
 
-	return e.peso_som * (e.peso_som // e.valor_som)
+	return e.valor_som * (e.valor_som / (PESO_LIMIT + 1 - e.peso_som))
 
 def valida_estado(e):
 	if e is None:
@@ -133,7 +139,7 @@ def f_fitness(e):
 
 	if (valida_estado(e)):
 		return f_objetivo(e) #tem que retornar entre 0 e 1?
-	return 0
+	return  (PESO_LIMIT / e.peso_som) * (e.valor_som * (e.valor_som / (e.peso_som)))
 
 def sortear_estado():
 	global populacao
@@ -151,7 +157,9 @@ def sortear_estado():
 
 def cruza_estados(e1, e2, ef):
 
-	if ((f_fitness(e1) + f_fitness(e2)) == 0):
+	if (PROB_50_50):
+		prob = 0.5
+	elif ((f_fitness(e1) + f_fitness(e2)) == 0):
 		prob = 0.5
 	else:
 		prob = f_fitness(e1) / (f_fitness(e1) + f_fitness(e2)) #entre 0 e 1
@@ -163,7 +171,10 @@ def cruza_estados(e1, e2, ef):
 			else:
 				ef.itens[i] = e2.itens[i]
 		else:
-			ef.itens[i] = e1.itens[i]
+			if (random.random() < CHANCE_MUTACAO):
+				ef.itens[i] = random.randint(0,1)
+			else:
+				ef.itens[i] = e1.itens[i]
 	atualiza_soma_estado(ef)
 
 def inicializa_populacao_ale():
@@ -173,9 +184,18 @@ def inicializa_populacao_ale():
 	if populacao is None or len(populacao) == 0:
 		populacao = [Estado() for _ in range(TAM_POPULACAO)]
 
-	random.seed(SEMENTE)
+	random.seed(SEMENTE_POPU)
+
+	e_vaz = Estado()
+	e_che = Estado()
+	for i in range(N_ITENS):
+		e_che.itens[i] = 1
+	atualiza_soma_estado(e_che)
 
 	for e in populacao:
+		
+		cruza_estados(e_vaz, e_che, e)
+
 		for i in range(N_ITENS):
 			e.itens[i] = random.randint(0, 1)
 		atualiza_soma_estado(e)
@@ -204,15 +224,21 @@ def main():
 	global populacao
 	nova_populacao = [Estado() for _ in range(TAM_POPULACAO)]
 	melhor = Estado()
-	for e in populacao:
-		print(e.valor_som, e.peso_som, e.itens)
+
+	if (MOSTRA_POP):
+		for e in populacao:
+			print(e.valor_som, e.peso_som, e.itens, f_fitness(e))
 	
-	print(f"Melhor solução encontrada {melhor.valor_som} / {melhor.peso_som} \n")
-	print(f"obtida levando {melhor.itens}")
-	
+	random.seed(SEMENTE_EXEC)
+
 	for i in range(N_GERACOES):
 		for e in nova_populacao:
-			cruza_estados(sortear_estado(), sortear_estado(), e)
+			e1 = sortear_estado()
+			populacao.remove(e1)
+			e2 = sortear_estado()
+			populacao.append(e1)
+
+			cruza_estados(e1,e2, e)
 			mutacao(e)
 			if (valida_estado(e)):
 				if (f_fitness(e) > f_fitness(melhor)):
@@ -221,10 +247,14 @@ def main():
 					melhor.valor_som = e.valor_som
 		populacao = [e for e in nova_populacao]
 		
-		for e in populacao:
-			print(e.valor_som, e.peso_som, e.itens)
-		print(f"Melhor solução encontrada {melhor.valor_som} / {melhor.peso_som} \n")
-		print(f"obtida levando {melhor.itens}")
+		if (MOSTRA_POP):
+			for e in populacao:
+				print(e.valor_som, e.peso_som, e.itens, f_fitness(e))
+		if (MOSTRA_MEL_GER):
+			print(f"Melhor estado na geração {i}: {melhor.valor_som} / {melhor.peso_som}, {f_fitness(melhor)} {melhor.itens}")
+	
+	print(f"\nMelhor solução encontrada {melhor.valor_som} / {melhor.peso_som}, {f_fitness(melhor)} {melhor.itens}")
+
 
 if __name__ == "__main__":
 	main()

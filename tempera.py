@@ -214,6 +214,6 @@ def main():
 	#print(f"obtida levando {melhor.itens}")
 	if(TESTE_TEMPO):
 		print(f"Tempo de execução: {t_exec}")
-	resultados.salva_parametros_resultados([[TEMP_INI,TEMP_DEC,N_ITENS,PESO_LIMIT,f"{melhor.valor_som/melhor.peso_som}",t_exec]],"teste2.csv",["Temp inicial","Temp dec","Numero de itens","Peso Máximo" ,"Solução", "Tempo de execução"])
+	resultados.salva_parametros_resultados([[TEMP_INI,TEMP_DEC,N_ITENS,PESO_LIMIT,f"{melhor.valor_som}/{melhor.peso_som}",t_exec]],"./Resultados/tempera.csv",["Temp inicial","Temp dec","Numero de itens","Peso Máximo" ,"Solução", "Tempo de execução"])
 if __name__ == "__main__":
     main()

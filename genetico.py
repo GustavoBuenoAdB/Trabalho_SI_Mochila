@@ -1,20 +1,33 @@
 import random
+import resultados
+import time
+import argparse
+
+
+parser = argparse.ArgumentParser(description='Algoritmo Genético para Problema da Mochila')
+parser.add_argument('-t', type=int, default=30, help='Tamanho da população')
+parser.add_argument('-ng', type=int, default=10, help='Número de gerações')
+parser.add_argument('-cm', type=float, default=0.1, help='Chance de mutação')
+parser.add_argument('-si', type=int, default=399, help='Semente para itens')
+parser.add_argument('-sp', type=int, default=420, help='Semente para população')
+parser.add_argument('-sx', type=int, default=6975, help='Semente para execução')
+
+args = parser.parse_args()
+
+TAM_POPULACAO = args.t
+N_GERACOES = args.ng
+CHANCE_MUTACAO = args.cm
+SEMENTE_ITEM = args.si
+SEMENTE_POPU = args.sp
+SEMENTE_EXEC = args.sx
 
 N_ITENS = 10
 PESO_LIMIT = 10
-
-TAM_POPULACAO = 30
-N_GERACOES = 10
-CHANCE_MUTACAO = 0.05
 
 VALOR_MAX = 10
 VALOR_MIN = 1
 PESO_MAX = 10
 PESO_MIN = 1
-
-SEMENTE_ITEM = 399
-SEMENTE_POPU = 420
-SEMENTE_EXEC = 6975
 
 MOSTRA_POP = 1
 MOSTRA_MEL_GER = True 
@@ -211,11 +224,11 @@ def atualiza_soma_estado(e):
 			som_valor += lista_itens[i].valor
 	e.valor_som = som_valor
 	e.peso_som = som_peso
-			
+
 def main():
 	inicializa_itens_ale()
 	inicializa_populacao_ale()
-
+	t_inicial = time.time()
 	global lista_itens
 
 	for item in lista_itens:
@@ -254,7 +267,9 @@ def main():
 			print(f"Melhor estado na geração {i}: {melhor.valor_som} / {melhor.peso_som}, {f_fitness(melhor)} {melhor.itens}")
 	
 	print(f"\nMelhor solução encontrada {melhor.valor_som} / {melhor.peso_som}, {f_fitness(melhor)} {melhor.itens}")
-
+	t_final = time.time()
+	tempo_execucao = t_final - t_inicial
+	resultados.salva_parametros_resultados([[N_GERACOES, TAM_POPULACAO, CHANCE_MUTACAO, f"{melhor.valor_som}/{melhor.peso_som}", tempo_execucao]],"teste1.csv",["Número Gerações","Tamanho População","Chance de Mutação", "Solução", "Tempo de execução"])
 
 if __name__ == "__main__":
 	main()

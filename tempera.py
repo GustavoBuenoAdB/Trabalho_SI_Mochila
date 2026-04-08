@@ -1,19 +1,30 @@
 import random
+import resultados
 import time
+import argparse
+
+
+parser = argparse.ArgumentParser(description='Simulated Annealing para Problema da Mochila')
+parser.add_argument('--n_itens', type=int, default=2500, help='Número de itens')
+parser.add_argument('--peso_limit', type=int, default=2, help='Limite de peso')
+parser.add_argument('--temp_ini', type=int, default=10000, help='Temperatura inicial')
+parser.add_argument('--temp_dec', type=int, default=1, help='Decréscimo de temperatura')
+parser.add_argument('--semente', type=int, default=10, help='Semente')
+
+args = parser.parse_args()
+
+N_ITENS = args.n_itens
+PESO_LIMIT = args.peso_limit
+TEMP_INI = args.temp_ini
+TEMP_DEC = args.temp_dec
+SEMENTE = args.semente
 
 TESTE_TEMPO = 0
-
-N_ITENS = 2500
-PESO_LIMIT = 2
-TEMP_INI = 10000
-TEMP_DEC = 1
 
 VALOR_MAX = 10
 VALOR_MIN = 1
 PESO_MAX = 10
 PESO_MIN = 1
-
-SEMENTE = 10
 
 class Item:
 	def __init__(self):
@@ -198,10 +209,11 @@ def main():
 				melhor.peso_som = e_atual.peso_som
 				melhor.valor_som = e_atual.valor_som
 	t_final = time.time()
+	t_exec = t_final - t_inicial
 	#print(f"Melhor solução encontrada {melhor.valor_som} / {melhor.peso_som} \n")
 	#print(f"obtida levando {melhor.itens}")
 	if(TESTE_TEMPO):
-		print(f"Tempo de execução: {t_final - t_inicial}")
-
+		print(f"Tempo de execução: {t_exec}")
+	resultados.salva_parametros_resultados([[TEMP_INI,TEMP_DEC,N_ITENS,PESO_LIMIT,f"{melhor.valor_som/melhor.peso_som}",t_exec]],"teste2.csv",["Temp inicial","Temp dec","Numero de itens","Peso Máximo" ,"Solução", "Tempo de execução"])
 if __name__ == "__main__":
     main()

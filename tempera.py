@@ -6,7 +6,7 @@ import argparse
 
 parser = argparse.ArgumentParser(description='Simulated Annealing para Problema da Mochila')
 parser.add_argument('--n_itens', type=int, default=2500, help='Número de itens')
-parser.add_argument('--peso_limit', type=int, default=2, help='Limite de peso')
+parser.add_argument('--peso_limit', type=int, default=100, help='Limite de peso')
 parser.add_argument('--temp_ini', type=int, default=10000, help='Temperatura inicial')
 parser.add_argument('--temp_dec', type=int, default=1, help='Decréscimo de temperatura')
 parser.add_argument('--semente', type=int, default=10, help='Semente')
@@ -21,10 +21,11 @@ SEMENTE = args.semente
 
 TESTE_TEMPO = 0
 
-VALOR_MAX = 10
+VALOR_MAX = 25
 VALOR_MIN = 1
 PESO_MAX = 10
 PESO_MIN = 1
+
 
 class Item:
 	def __init__(self):
@@ -39,6 +40,9 @@ class Estado:
 
 # lista global de todos os itens
 lista_itens = None
+
+# contador global
+i = 0
 
 # inicializa os valores dos itens do problema em valores randomicos entre MIN e MAX definidos nas macros
 def inicializa_itens_ale():
@@ -171,11 +175,17 @@ def atualiza_soma_estado(e):
 	e.peso_som = som_peso
 
 def prob_troca(e_at, viz, temp):
+	global i
 	if (f_objetivo(e_at) < f_objetivo(viz)):
 		return 1.0
+	#resultados.salva_parametros_resultados([[i, (f_objetivo(viz)/f_objetivo(e_at)) * (temp /TEMP_INI)]], "funcoes_prob_troca_antiga.csv", ["id","g(x)"])
+	#i += 1
 	return ((f_objetivo(viz)/f_objetivo(e_at)) * (temp /TEMP_INI))
+	#return((temp /TEMP_INI))
 
 def main():
+	global i
+	i = 0
 	t_inicial = time.time()
 	inicializa_itens_ale()
 	e_atual = Estado()
@@ -214,6 +224,7 @@ def main():
 	#print(f"obtida levando {melhor.itens}")
 	if(TESTE_TEMPO):
 		print(f"Tempo de execução: {t_exec}")
-	resultados.salva_parametros_resultados([[TEMP_INI,TEMP_DEC,N_ITENS,PESO_LIMIT,f"{melhor.valor_som}/{melhor.peso_som}",t_exec]],"./Resultados/tempera.csv",["Temp inicial","Temp dec","Numero de itens","Peso Máximo" ,"Solução", "Tempo de execução"])
+	#resultados.salva_parametros_resultados([[TEMP_INI,TEMP_DEC,N_ITENS,PESO_LIMIT,f"{melhor.valor_som}/{melhor.peso_som}",t_exec]],"./Resultados/tempera.csv",["Temp inicial","Temp dec","Numero de itens","Peso Máximo" ,"Solução", "Tempo de execução"])
+	resultados.salva_parametros_resultados([[TEMP_INI,melhor.valor_som]],"./Resultados/temp_MelhorEscolha.csv",["Temp inicial","Melhor Escolha"])
 if __name__ == "__main__":
     main()

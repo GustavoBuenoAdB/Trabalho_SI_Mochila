@@ -135,7 +135,7 @@ def f_objetivo(e):
 
 	if e.valor_som == 0:
 		return 0
-
+	resultados.salva_parametros_resultados([[e.valor_som * (e.valor_som / (PESO_LIMIT + 1 - e.peso_som))]], "funcoes_objetivo.csv", ["F(x)"])
 	return e.valor_som * (e.valor_som / (PESO_LIMIT + 1 - e.peso_som))
 
 def valida_estado(e):
@@ -269,7 +269,7 @@ def main():
 	print(f"\nMelhor solução encontrada {melhor.valor_som} / {melhor.peso_som}, {f_fitness(melhor)} {melhor.itens}")
 	t_final = time.time()
 	tempo_execucao = t_final - t_inicial
-	resultados.salva_parametros_resultados([[N_GERACOES, TAM_POPULACAO, CHANCE_MUTACAO, f"{melhor.valor_som}/{melhor.peso_som}", tempo_execucao]],"teste1.csv",["Número Gerações","Tamanho População","Chance de Mutação", "Solução", "Tempo de execução"])
+	resultados.salva_parametros_resultados([[TAM_POPULACAO, melhor.valor_som, tempo_execucao]],"tampop_tempo_qual.csv",["Tamanho População", "Solução", "Tempo de execução"])
 
 if __name__ == "__main__":
 	main()
